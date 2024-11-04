@@ -1,0 +1,31 @@
+spring:
+  application:
+    name:
+      myblog
+  datasource:
+    url: jdbc:mysql://localhost:3306/reblog
+    password: 1rdz3456789o
+    username: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  mail:
+    host: smtp.163.com
+    username: you_persona_use@163.com
+    password: VSRt6uJae4YeTrXH
+minio:
+  url: http://localhost:9000 # ????
+  access: minioadmin # ??
+  secret: minioadmin # ??
+  bucket: sonicyouth
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: deFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
