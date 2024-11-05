@@ -32,4 +32,25 @@ public class UserController {
         return userService.getCode(email);
     }
 
+    @GetMapping("/follow/{id}")
+    public Result follow(@PathVariable Integer id) {
+        return userService.follow(id);
+    }
+
+    @GetMapping("/unfollow/{id}")
+    public Result unfollow(@PathVariable Integer id) {
+        return userService.unfollow(id);
+    }
+
+    //关注列表
+    @GetMapping("/followers")
+    public Result followers() {
+        return userService.followers();
+    }
+
+    @GetMapping("/followee")
+    public Result followee() {
+        return userService.followee();
+    }
+
 }

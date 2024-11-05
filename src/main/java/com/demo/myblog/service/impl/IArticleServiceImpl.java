@@ -25,4 +25,6 @@ public class IArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> imp
         this.save(articleEntity);
         return Result.ok();
     }
+
+
 }

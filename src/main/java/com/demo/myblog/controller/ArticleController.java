@@ -20,4 +20,7 @@ public class ArticleController {
     public Result upload(@RequestBody @Valid ArticleUploadDTO article) {
         return articleService.upload(article);
     }
+
+
+
 }

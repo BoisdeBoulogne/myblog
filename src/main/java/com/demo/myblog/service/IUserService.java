@@ -14,4 +14,12 @@ public interface IUserService extends IService<User> {
     Result register(UserRegisterDTO user);
 
     Result getCode(String email);
+
+    Result follow(Integer id);
+
+    Result unfollow(Integer id);
+
+    Result followers();
+
+    Result followee();
 }

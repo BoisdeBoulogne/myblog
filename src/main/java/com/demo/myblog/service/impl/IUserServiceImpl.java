@@ -8,6 +8,7 @@ import com.demo.myblog.entry.dto.UserRegisterDTO;
 import com.demo.myblog.entry.result.Result;
 import com.demo.myblog.entry.table.User;
 import com.demo.myblog.entry.table.User2User;
+import com.demo.myblog.entry.vo.UserVo;
 import com.demo.myblog.entry.vo.UserVoAfterLogin;
 import com.demo.myblog.enums.AppEnum;
 import com.demo.myblog.exception.SystemException;
@@ -16,6 +17,7 @@ import com.demo.myblog.mapper.UserMapper;
 import com.demo.myblog.service.IUserService;
 import com.demo.myblog.utils.JwtUtils;
 import com.demo.myblog.utils.RedisUtils;
+import com.demo.myblog.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -28,6 +30,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -97,7 +101,9 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
             throw new SystemException(AppEnum.EXIST_CODE);
         }
         Random random = new Random();
+
         Integer code = random.nextInt(900000) + 100000;
+        log.info(code.toString());
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("code");
@@ -105,8 +111,79 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
         message.setText(code.toString());
         message.setFrom("you_persona_use@163.com");
         javaMailSender.send(message);
+        return Result.ok("验证码:"+code);
+    }
+
+    //关注
+    @Override
+    public Result follow(Integer id) {
+        LambdaQueryWrapper<User> exists = new LambdaQueryWrapper<>();
+        exists.eq(User::getId, id);
+        boolean isExists = this.exists(exists);
+        if (!isExists) {
+            throw new SystemException(AppEnum.NO_SUCH_ENTRY);
+        }
+        User2User user2User = new User2User();
+        user2User.setFolloweeId(SecurityUtils.getUserId());
+        user2User.setFollowerId(id);
+        user2UserMapper.insert(user2User);
         return Result.ok();
     }
+    //取消关注
+    @Override
+    public Result unfollow(Integer id) {
+        LambdaQueryWrapper<User2User> exists = new LambdaQueryWrapper<>();
+        exists.eq(User2User::getFollowerId, id);
+        exists.eq(User2User::getFolloweeId, SecurityUtils.getUserId());
+        boolean isExists = user2UserMapper.exists(exists);
+        if (!isExists) {
+            throw new SystemException(AppEnum.NO_SUCH_ENTRY);
+        }
+        user2UserMapper.delete(exists);
+        return Result.ok();
+    }
+
+    @Override
+    public Result followers() {
+        LambdaQueryWrapper<User2User> list = new LambdaQueryWrapper<>();
+        list.eq(User2User::getFolloweeId, SecurityUtils.getUserId());
+        List<Integer> followersIds = user2UserMapper.selectList(list).stream().map(User2User::getFollowerId).toList();
+        List<UserVo> userVos = new ArrayList<>();
+        for (Integer followerId : followersIds) {
+            User user = getById(followerId);
+            UserVo userVo = new UserVo();
+            BeanUtils.copyProperties(user, userVo);
+            userVo.setFollowingCount(getFolloweeCount(user.getId()));
+            userVo.setFollowerCount(getFollowerCount(user.getId()));
+            userVo.setIsFollowing(ifFollower(user.getId(),SecurityUtils.getUserId()));
+            userVos.add(userVo);
+        }
+        return Result.ok(userVos);
+
+    }
+
+    @Override
+    public Result followee() {
+        LambdaQueryWrapper<User2User> list = new LambdaQueryWrapper<>();
+        list.eq(User2User::getFollowerId, SecurityUtils.getUserId());
+        List<User2User> user2Users = user2UserMapper.selectList(list);
+        List<Integer> followeeIds = user2Users.stream().map(User2User::getFolloweeId).toList();
+        List<UserVo> userVos = new ArrayList<>();
+        for (Integer followeeId : followeeIds) {
+            User user = getById(followeeId);
+            UserVo userVo = new UserVo();
+            BeanUtils.copyProperties(user, userVo);
+            userVo.setFollowingCount(getFolloweeCount(user.getId()));
+            userVo.setFollowerCount(getFollowerCount(user.getId()));
+            userVo.setIsFollowing(ifFollower(user.getId(),SecurityUtils.getUserId()));
+            userVos.add(userVo);
+        }
+        return Result.ok(userVos);
+    }
+
+
+    
+
 
     private Integer getFolloweeCount(Integer userId) {
         LambdaQueryWrapper<User2User> followeeQueryWrapper = new LambdaQueryWrapper<>();
@@ -120,6 +197,13 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
         return user2UserMapper.selectCount(followeeQueryWrapper).intValue();
     }
     //关注的人的数目
+
+    private boolean ifFollower(Integer userId, Integer followerId) {
+        LambdaQueryWrapper<User2User> followeeQueryWrapper = new LambdaQueryWrapper<>();
+        followeeQueryWrapper.eq(User2User::getFolloweeId,userId);
+        followeeQueryWrapper.eq(User2User::getFollowerId,followerId);
+        return user2UserMapper.exists(followeeQueryWrapper);
+    }
 
 
 

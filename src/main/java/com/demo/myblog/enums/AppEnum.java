@@ -15,6 +15,7 @@ public enum AppEnum {
     WRONG_EMAIL(505,"邮箱地址错误"),
     WRONG_QUERY(506,"访问参数错误"),
     WRONG_JWT(401,"jwt解析错误"),
+    NO_SUCH_ENTRY(402,"没有对应的数据"),
     EXIST_CODE(501,"已经发送过，请稍后重试");
 
     private final int code;

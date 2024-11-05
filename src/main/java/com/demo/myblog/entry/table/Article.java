@@ -27,5 +27,6 @@ public class Article {
     @TableLogic
     private Integer delFlag;
 
+    private Integer views;
 
 }
