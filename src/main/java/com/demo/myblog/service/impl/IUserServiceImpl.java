@@ -7,9 +7,11 @@ import com.demo.myblog.entry.dto.UserLoginDTO;
 import com.demo.myblog.entry.dto.UserRegisterDTO;
 import com.demo.myblog.entry.result.Result;
 import com.demo.myblog.entry.table.User;
+import com.demo.myblog.entry.table.User2User;
 import com.demo.myblog.entry.vo.UserVoAfterLogin;
 import com.demo.myblog.enums.AppEnum;
 import com.demo.myblog.exception.SystemException;
+import com.demo.myblog.mapper.User2UserMapper;
 import com.demo.myblog.mapper.UserMapper;
 import com.demo.myblog.service.IUserService;
 import com.demo.myblog.utils.JwtUtils;
@@ -42,6 +44,8 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
 
     @Resource
     private PasswordEncoder passwordEncoder;
+    @Resource
+    private User2UserMapper user2UserMapper;
 
 
 
@@ -53,10 +57,14 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
             throw new SystemException(AppEnum.ERROR_AUTH);
         }
         User userInfo =  ((LoginUser) authentication.getPrincipal()).getUser();
+        Integer userId = userInfo.getId();
+
         redisUtils.set(LOGIN_USER+userInfo.getId(),userInfo,30, TimeUnit.MINUTES);
         UserVoAfterLogin userVo = new UserVoAfterLogin();
         BeanUtils.copyProperties(userInfo,userVo);
         userVo.setToken(JwtUtils.generateToken(userInfo.getId()));
+        userVo.setFolloweeCount(getFolloweeCount(userId));
+        userVo.setFollowerCount(getFollowerCount(userId));
         return Result.ok(userVo);
     }
 
@@ -70,8 +78,6 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
         if (!codeInRedis.equals(codeInDTO)){
             throw new SystemException(AppEnum.WRONG_CODE);
         }
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getEmail, user.getEmail());
 
         redisUtils.del(CODE+user.getEmail());
         User userForDB = new User();
@@ -79,11 +85,8 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
         userForDB.setPassword(passwordEncoder.encode(user.getPassword()));
         userForDB.setUnlocked(true);
         userForDB.setRole(USER);
-        try {
-            save(userForDB);
-        } catch (DuplicateKeyException e) {
-            throw new SystemException(AppEnum.EXIST_DATA);
-        }
+
+        save(userForDB);
         return Result.ok();
     }
     @Resource
@@ -104,4 +107,21 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
         javaMailSender.send(message);
         return Result.ok();
     }
+
+    private Integer getFolloweeCount(Integer userId) {
+        LambdaQueryWrapper<User2User> followeeQueryWrapper = new LambdaQueryWrapper<>();
+        followeeQueryWrapper.eq(User2User::getFollowerId,userId);
+        return user2UserMapper.selectCount(followeeQueryWrapper).intValue();
+    }
+    //粉丝数目
+    private Integer getFollowerCount(Integer userId) {
+        LambdaQueryWrapper<User2User> followeeQueryWrapper = new LambdaQueryWrapper<>();
+        followeeQueryWrapper.eq(User2User::getFolloweeId,userId);
+        return user2UserMapper.selectCount(followeeQueryWrapper).intValue();
+    }
+    //关注的人的数目
+
+
+
+
 }

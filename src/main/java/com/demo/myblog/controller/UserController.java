@@ -32,9 +32,4 @@ public class UserController {
         return userService.getCode(email);
     }
 
-    @GetMapping("/testJwt")
-    public Result testJwt(){
-        return Result.ok("success");
-    }
-
 }

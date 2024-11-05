@@ -9,4 +9,6 @@ public class UserVoAfterLogin {
     private String nickname;
     private String avatar;
     private String role;
+    private Integer followeeCount;
+    private Integer followerCount;
 }

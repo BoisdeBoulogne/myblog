@@ -23,7 +23,7 @@ public class UploadFileController {
     @Resource
     UserMapper userMapper;
 
-    @PostMapping
+    @PostMapping("/upload")
     public String uploadFile(MultipartFile file) throws Exception {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
@@ -56,11 +56,6 @@ public class UploadFileController {
         return "success";
     }
 
-    @GetMapping("/test")
-    public String test() throws Exception {
-        User user = userMapper.selectById(1);
-        System.out.println(user);
-        return "success";
-    }
+
 
 }

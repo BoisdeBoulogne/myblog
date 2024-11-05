@@ -1,6 +1,7 @@
 package com.demo.myblog.Interceptors;
 
 import com.demo.myblog.entry.dto.LoginUser;
+import com.demo.myblog.entry.table.User;
 import com.demo.myblog.enums.AppEnum;
 import com.demo.myblog.exception.SystemException;
 import com.demo.myblog.utils.JwtUtils;
@@ -28,12 +29,16 @@ public class JwtInterceptor extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
-        if (authHeader==null || authHeader.startsWith("Bearer ")) {
+        if (authHeader==null || authHeader.startsWith("Bearer")) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        LoginUser loginUser =  new LoginUser(redisUtils.get(LOGIN_USER+JwtUtils.parseToken(authHeader)));
+        Integer userId = JwtUtils.parseToken(authHeader);
+        User user = redisUtils.get(LOGIN_USER+userId);
+        if (user==null) {
+            throw new SystemException(AppEnum.FORCE_LOGOUT);
+        }
+        LoginUser loginUser =  new LoginUser(user);
         Authentication authentication = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         filterChain.doFilter(request, response);

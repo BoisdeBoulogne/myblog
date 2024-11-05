@@ -3,7 +3,9 @@ package com.demo.myblog.handler;
 import com.demo.myblog.entry.result.Result;
 import com.demo.myblog.enums.AppEnum;
 import com.demo.myblog.exception.SystemException;
+import io.jsonwebtoken.JwtException;
 import jakarta.mail.internet.AddressException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,5 +28,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AddressException.class)
     public void addressException(AddressException e) {
         throw new SystemException(AppEnum.WRONG_EMAIL);
+    }
+    @ExceptionHandler(JwtException.class)
+    public void jwtException(JwtException e) {
+        throw new SystemException(AppEnum.WRONG_JWT);
+    }
+    @ExceptionHandler(DuplicateKeyException.class)
+    public void duplicateKeyException(DuplicateKeyException e) {
+        throw new SystemException(AppEnum.EXIST_DATA);
     }
 }

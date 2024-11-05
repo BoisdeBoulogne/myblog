@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeRequests(authorize -> authorize
                         .requestMatchers("/user/login", "/logout","/user/register","/user/getCode").permitAll()
-                        .requestMatchers("user/testJwt").hasAuthority("ADMIN")
+                        .requestMatchers("/file").hasAnyAuthority(Constants.ADMIN,Constants.USER)
 
                 )
 
