@@ -8,4 +8,10 @@ import jakarta.validation.Valid;
 
 public interface IArticleService extends IService<Article> {
     Result upload(ArticleUploadDTO article);
+
+    Result getArticle(Integer id);
+
+    Result deleteArticle(Integer id);
+
+    Result updateArticle(Integer id, ArticleUploadDTO uploadDTO);
 }

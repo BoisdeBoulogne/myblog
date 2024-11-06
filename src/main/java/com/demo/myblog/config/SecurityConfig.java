@@ -34,11 +34,9 @@ public class SecurityConfig {
                 .addFilterBefore(jwtInterceptor, UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable())
                 .authorizeRequests(authorize -> authorize
-                        .requestMatchers("/user/login", "/logout","/user/register","/user/getCode").permitAll()
+                        .requestMatchers("/user/login", "/logout","/user/register","/user/getCode","/article/get/*").permitAll()
                         .anyRequest().authenticated()
                 )
-
-
                 .logout(logout -> logout
                         .permitAll()
                 );

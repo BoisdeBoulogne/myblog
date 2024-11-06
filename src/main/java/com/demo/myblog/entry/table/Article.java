@@ -11,7 +11,7 @@ import java.util.Date;
 @Data
 @TableName("article")
 public class Article {
-    private Long id;
+    private Integer id;
     private String title;
     private String avatar;
     private String content;
@@ -25,7 +25,7 @@ public class Article {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
     @TableLogic
-    private Integer delFlag;
+    private Integer deFlag;
 
     private Integer views;
 

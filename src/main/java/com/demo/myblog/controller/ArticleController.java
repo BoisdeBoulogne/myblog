@@ -6,10 +6,8 @@ import com.demo.myblog.entry.table.Article;
 import com.demo.myblog.service.IArticleService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.apache.ibatis.annotations.Delete;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/article")
@@ -21,6 +19,19 @@ public class ArticleController {
         return articleService.upload(article);
     }
 
+    @GetMapping("/get/{id}")
+    public Result getArticle(@PathVariable Integer id) {
+        return articleService.getArticle(id);
+    }
 
+    @DeleteMapping("/delete/{id}")
+    public Result deleteArticle(@PathVariable Integer id) {
+        return articleService.deleteArticle(id);
+    }
+
+    @PutMapping("/update/{id}")
+    public Result updateArticle(@PathVariable Integer id,@RequestBody ArticleUploadDTO uploadDTO){
+        return articleService.updateArticle(id,uploadDTO);
+    }
 
 }

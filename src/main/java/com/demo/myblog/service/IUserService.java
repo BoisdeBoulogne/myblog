@@ -22,4 +22,12 @@ public interface IUserService extends IService<User> {
     Result followers();
 
     Result followee();
+
+    Result historyList();
+
+    Result collect(Integer id);
+
+    Result uncollect(Integer id);
+
+    Result myCollects();
 }

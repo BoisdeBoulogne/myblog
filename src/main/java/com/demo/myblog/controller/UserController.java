@@ -53,4 +53,22 @@ public class UserController {
         return userService.followee();
     }
 
+    @GetMapping("/myhistory")
+    public Result historyList() {
+        return userService.historyList();
+    }
+
+    @GetMapping("/collect/{id}")
+    public Result collect(@PathVariable Integer id) {
+        return userService.collect(id);
+    }
+    @DeleteMapping("/notcollect/{id}")
+    public Result uncollect(@PathVariable Integer id) {
+        return userService.uncollect(id);
+    }
+
+    @GetMapping("/collects")
+    public Result collects() {
+        return userService.myCollects();
+    }
 }
