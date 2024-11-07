@@ -1,6 +1,7 @@
 package com.demo.myblog.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.demo.myblog.entry.dto.ChangeRoleDTO;
 import com.demo.myblog.entry.dto.Query;
 import com.demo.myblog.entry.dto.UserLoginDTO;
 import com.demo.myblog.entry.dto.UserRegisterDTO;
@@ -39,4 +40,11 @@ public interface IUserService extends IService<User> {
     Result<HomePageVo> homePage(Integer page);
 
     Result<UserVo> search(Integer page, Query query);
+
+
+    Result userList(Integer pageNum);
+
+    Result banUser(Integer id);
+
+    Result changeRole(ChangeRoleDTO changeRoleDTO);
 }

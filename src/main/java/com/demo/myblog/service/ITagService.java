@@ -7,4 +7,6 @@ import com.demo.myblog.entry.table.Tag;
 public interface ITagService extends IService<Tag> {
 
     Result getTags();
+
+    Result getArticlesById(Integer id);
 }

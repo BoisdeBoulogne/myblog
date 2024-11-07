@@ -11,4 +11,5 @@ public class UserVo{
     private Integer followerCount;
     private Integer followingCount;
     private Boolean isFollowing;
+    private Integer id;
 }

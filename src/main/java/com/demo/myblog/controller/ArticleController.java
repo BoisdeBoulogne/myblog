@@ -1,6 +1,7 @@
 package com.demo.myblog.controller;
 
 import com.demo.myblog.entry.dto.ArticleUploadDTO;
+import com.demo.myblog.entry.dto.ChangeRoleDTO;
 import com.demo.myblog.entry.result.Result;
 import com.demo.myblog.entry.table.Article;
 import com.demo.myblog.service.IArticleService;
@@ -33,5 +34,8 @@ public class ArticleController {
     public Result updateArticle(@PathVariable Integer id,@RequestBody ArticleUploadDTO uploadDTO){
         return articleService.updateArticle(id,uploadDTO);
     }
+
+
+
 
 }

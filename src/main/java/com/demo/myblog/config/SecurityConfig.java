@@ -34,8 +34,11 @@ public class SecurityConfig {
                 .addFilterBefore(jwtInterceptor, UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable())
                 .authorizeRequests(authorize -> authorize
-                        .requestMatchers("/user/login", "/logout","/user/register","/user/getCode","/article/get/*").permitAll()
+                        .requestMatchers("/user/login", "/logout","/user/register","/user/getCode","/article/get/*","/tags/*").permitAll()
+                        .requestMatchers("/admin/changeRole").hasRole(Constants.SUPER_ADMIN)
+                        .requestMatchers("/admin").hasRole(Constants.ADMIN)
                         .anyRequest().authenticated()
+
                 )
                 .logout(logout -> logout
                         .permitAll()

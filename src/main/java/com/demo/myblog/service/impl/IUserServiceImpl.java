@@ -3,10 +3,7 @@ package com.demo.myblog.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.demo.myblog.entry.dto.LoginUser;
-import com.demo.myblog.entry.dto.Query;
-import com.demo.myblog.entry.dto.UserLoginDTO;
-import com.demo.myblog.entry.dto.UserRegisterDTO;
+import com.demo.myblog.entry.dto.*;
 import com.demo.myblog.entry.result.Result;
 import com.demo.myblog.entry.table.*;
 import com.demo.myblog.entry.vo.*;
@@ -214,10 +211,10 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
     public Result<HomePageVo> homePage(Integer page) {
         List<Article> articles = articleServiceImpl.list();
         PageVo pageVo = new PageVo();
-        pageVo.setArticleCount(articles.size());
+        pageVo.setCount(articles.size());
         articles.sort((a1,a2) -> Double.compare(articleServiceImpl.getHot(a2),articleServiceImpl.getHot(a1)));
         List<ArticlePerVo> articlePerVos = articleServiceImpl.getArticlePerList(articles.stream().map(Article::getId).toList());
-        pageVo.setArticles(articlePerVos);
+        pageVo.setEntry(articlePerVos);
         HomePageVo homePageVo = new HomePageVo(pageVo,redisUtils.getKeyCountByPrefix(LOGIN_USER));
         return Result.ok(homePageVo);
     }
@@ -225,6 +222,39 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
     @Override
     public Result search(Integer page, Query query) {
         return Result.ok(articleServiceImpl.getPage(page,query));
+    }
+
+
+    private Result forceLogout(Integer id) {
+        redisUtils.del(LOGIN_USER+id);
+        return Result.ok();
+    }
+
+    @Override
+    public Result userList(Integer pageNum) {
+        Page<User> userPage = new Page<>(pageNum,10);
+        List<Integer> userList = list(userPage).stream().map(User::getId).toList();
+        return Result.ok(getUserVos(userList));
+    }
+
+    @Override
+    public Result banUser(Integer id) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getId, id);
+        User user = getById(id);
+        user.setUnlocked(false);
+        update(user,queryWrapper);
+        return Result.ok();
+    }
+
+    @Override
+    public Result changeRole(ChangeRoleDTO changeRoleDTO) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getId, changeRoleDTO.getUserId());
+        User user = getById(changeRoleDTO.getUserId());
+        user.setRole(changeRoleDTO.getRoleName().getRoleName());
+        update(user,queryWrapper);
+        return Result.ok();
     }
 
     private Integer getFolloweeCount(Integer userId) {

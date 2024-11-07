@@ -200,9 +200,9 @@ public class IArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> imp
         articleQueryWrapper.like(query.getContent()!=null,Article::getContent,query.getContent());
         articleQueryWrapper.like(query.getTitle()!=null,Article::getTitle,query.getTitle());
         List<Integer> articles = this.list(articleQueryWrapper).stream().limit(pageNum*10).map(Article::getId).toList();
-        PageVo pageVo = new PageVo();
-        pageVo.setArticles(getArticlePerList(articles));
-        pageVo.setArticleCount(articles.size());
+        PageVo<ArticlePerVo> pageVo = new PageVo<>();
+        pageVo.setEntry(getArticlePerList(articles));
+        pageVo.setCount(articles.size());
         return pageVo;
     }
 }

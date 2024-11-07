@@ -4,8 +4,8 @@ import lombok.Data;
 
 import java.util.List;
 @Data
-public class PageVo {
-    private Integer articleCount;
-    private List<ArticlePerVo> articles;
+public class PageVo<T> {
+    private Integer count;
+    private List<T> entry;
 
 }
