@@ -16,4 +16,5 @@ public class ArticlePerVo {
     private Integer views;
     private List<String> tags;
     private Integer collects;
+    private Integer id;
 }

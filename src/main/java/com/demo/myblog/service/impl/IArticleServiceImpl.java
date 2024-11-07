@@ -3,10 +3,12 @@ package com.demo.myblog.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.demo.myblog.entry.dto.ArticleUploadDTO;
+import com.demo.myblog.entry.dto.Query;
 import com.demo.myblog.entry.result.Result;
 import com.demo.myblog.entry.table.*;
 import com.demo.myblog.entry.vo.ArticleDetailVo;
 import com.demo.myblog.entry.vo.ArticlePerVo;
+import com.demo.myblog.entry.vo.PageVo;
 import com.demo.myblog.enums.AppEnum;
 import com.demo.myblog.exception.SystemException;
 import com.demo.myblog.mapper.*;
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.units.qual.A;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,6 +41,8 @@ public class IArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> imp
     private HistoryMapper historyMapper;
     @Resource
     private CollectMapper collectMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public Result upload( ArticleUploadDTO article) {
@@ -177,5 +182,27 @@ public class IArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> imp
                     return tag.getName();
                 }
         ).collect(Collectors.toList());
+    }
+
+    public Double getHot(Article article) {
+        LambdaQueryWrapper<Collect> collectQueryWrapper = new LambdaQueryWrapper<>();
+        collectQueryWrapper.eq(Collect::getArticleId, article.getId());
+        Integer collectCount = collectMapper.selectCount(collectQueryWrapper).intValue();
+        return article.getViews()*0.1+collectCount*0.5;
+    }
+
+    public PageVo getPage(Integer pageNum, Query query) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(query.getAuthor()!=null,User::getNickname,query.getAuthor());
+        List<Integer> userIds = userMapper.selectList(queryWrapper).stream().map(User::getId).collect(Collectors.toList());
+        LambdaQueryWrapper<Article> articleQueryWrapper = new LambdaQueryWrapper<>();
+        articleQueryWrapper.in(!userIds.isEmpty(), Article::getId, userIds);
+        articleQueryWrapper.like(query.getContent()!=null,Article::getContent,query.getContent());
+        articleQueryWrapper.like(query.getTitle()!=null,Article::getTitle,query.getTitle());
+        List<Integer> articles = this.list(articleQueryWrapper).stream().limit(pageNum*10).map(Article::getId).toList();
+        PageVo pageVo = new PageVo();
+        pageVo.setArticles(getArticlePerList(articles));
+        pageVo.setArticleCount(articles.size());
+        return pageVo;
     }
 }

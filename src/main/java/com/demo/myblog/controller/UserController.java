@@ -1,13 +1,17 @@
 package com.demo.myblog.controller;
 
+import com.demo.myblog.entry.dto.Query;
 import com.demo.myblog.entry.dto.UserLoginDTO;
 import com.demo.myblog.entry.dto.UserRegisterDTO;
 import com.demo.myblog.entry.result.Result;
+import com.demo.myblog.entry.vo.HomePageVo;
+import com.demo.myblog.entry.vo.UserVo;
 import com.demo.myblog.entry.vo.UserVoAfterLogin;
 import com.demo.myblog.service.IUserService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.constraints.Email;
 import org.springframework.web.bind.annotation.*;
@@ -70,5 +74,20 @@ public class UserController {
     @GetMapping("/collects")
     public Result collects() {
         return userService.myCollects();
+    }
+
+    @GetMapping("/change/avatar/{url}")
+    public Result changeAvatar(@PathVariable String url) {
+        return userService.changeAvatar(url);
+    }
+
+    @GetMapping("/homepage")
+    public Result<HomePageVo> homepage(@RequestParam(defaultValue = "1") Integer page) {
+        return userService.homePage(page);
+    }
+
+    @GetMapping("/search")
+    public Result<UserVo> search(@RequestParam(defaultValue = "1") Integer page, @RequestBody Query query){
+        return userService.search(page,query);
     }
 }

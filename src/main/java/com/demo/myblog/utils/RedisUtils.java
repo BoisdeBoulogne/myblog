@@ -1,9 +1,12 @@
 package com.demo.myblog.utils;
 
 import jakarta.annotation.Resource;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -24,5 +27,9 @@ public class RedisUtils {
     public void del(String key) {
         redisTemplate.delete(key);
     }
+    public Integer getKeyCountByPrefix(String prefix) {
+        Set<String> keys = redisTemplate.keys(prefix + "*");
 
+        return keys != null ? keys.size() : 0;
+    }
 }

@@ -1,18 +1,15 @@
 package com.demo.myblog.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.demo.myblog.entry.dto.LoginUser;
+import com.demo.myblog.entry.dto.Query;
 import com.demo.myblog.entry.dto.UserLoginDTO;
 import com.demo.myblog.entry.dto.UserRegisterDTO;
 import com.demo.myblog.entry.result.Result;
-import com.demo.myblog.entry.table.Collect;
-import com.demo.myblog.entry.table.History;
-import com.demo.myblog.entry.table.User;
-import com.demo.myblog.entry.table.User2User;
-import com.demo.myblog.entry.vo.ArticlePerVo;
-import com.demo.myblog.entry.vo.UserVo;
-import com.demo.myblog.entry.vo.UserVoAfterLogin;
+import com.demo.myblog.entry.table.*;
+import com.demo.myblog.entry.vo.*;
 import com.demo.myblog.enums.AppEnum;
 import com.demo.myblog.exception.SystemException;
 import com.demo.myblog.mapper.CollectMapper;
@@ -202,6 +199,34 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
         return Result.ok(articleServiceImpl.getArticlePerList(articleIds)) ;
     }
 
+    @Override
+    public Result changeAvatar(String url) {
+        Integer id = SecurityUtils.getUserId();
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getId, id);
+        User user = new User();
+        user.setAvatar(url);
+        update(user,queryWrapper);
+        return Result.ok();
+    }
+
+    @Override
+    public Result<HomePageVo> homePage(Integer page) {
+        List<Article> articles = articleServiceImpl.list();
+        PageVo pageVo = new PageVo();
+        pageVo.setArticleCount(articles.size());
+        articles.sort((a1,a2) -> Double.compare(articleServiceImpl.getHot(a2),articleServiceImpl.getHot(a1)));
+        List<ArticlePerVo> articlePerVos = articleServiceImpl.getArticlePerList(articles.stream().map(Article::getId).toList());
+        pageVo.setArticles(articlePerVos);
+        HomePageVo homePageVo = new HomePageVo(pageVo,redisUtils.getKeyCountByPrefix(LOGIN_USER));
+        return Result.ok(homePageVo);
+    }
+
+    @Override
+    public Result search(Integer page, Query query) {
+        return Result.ok(articleServiceImpl.getPage(page,query));
+    }
+
     private Integer getFolloweeCount(Integer userId) {
         LambdaQueryWrapper<User2User> followeeQueryWrapper = new LambdaQueryWrapper<>();
         followeeQueryWrapper.eq(User2User::getFollowerId,userId);
@@ -236,5 +261,6 @@ public class IUserServiceImpl extends ServiceImpl<UserMapper, User> implements I
         followeeQueryWrapper.eq(User2User::getFollowerId,followerId);
         return user2UserMapper.exists(followeeQueryWrapper);
     }
+
 
 }
